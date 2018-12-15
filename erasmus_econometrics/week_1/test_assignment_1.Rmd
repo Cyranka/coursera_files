@@ -1,0 +1,107 @@
+---
+title: "Erasmus Econometrics - Test Assignment 1"
+author: "Harro Cyranka"
+date: "7/15/2017"
+output: pdf_document
+
+---
+```{r, echo=FALSE, message=FALSE}
+remove(list = ls())
+options(scipen = 999)
+setwd("/Users/francisco06121988/Desktop/online_learning/coursera/econometrics_mooc/week_1/")
+library(readxl)
+x <- read_excel("TestExer1-holiday expenditures-round2.xls")
+```
+\section{Introduction}
+\indent In this assignment, I try to explore a dataset whose observations do not satisfy all the standard assumptions of linear regression. Specifically, the dataset violates assumption 6 that the coefficients $\alpha$ and $\beta$ are the same for all observations.
+
+\smallskip
+\subsection{Estimating OLS Coefficients, Age Standard Error and Age T-Value}
+```{r, echo = FALSE}
+#The Code Below Estimates OLS Coefficients
+first_model <- lm(Expenditures ~ Age, data = x)
+```
+
+```{r, echo = FALSE}
+##Printing OLS Coefficients
+print(paste("Estimate of the Intercept: ", as.character(round(coef(summary(first_model))[,"Estimate"][1],2)), sep = ""))
+
+print(paste("Estimate of the Age Coefficient: ", as.character(round(coef(summary(first_model))[,"Estimate"][2],2)), sep = ""))
+
+
+#Regression Standard Errors
+print(paste("Standard Error of Age Coefficient: ",as.character(round(summary(first_model)[["coefficients"]][2,2],4)),
+sep = ""))
+
+print(paste("T-statistic of Age Coefficient: ",as.character(round(coef(summary(first_model))[,"t value"][2],4)),
+sep = ""))
+
+print(paste("P-Value Associated with Age Coefficient: ",as.character(round(coef(summary(first_model))[,"Pr(>|t|)"][2],4)),
+sep = ""))
+
+```
+
+\subsection{Creating a Scatter Diagram to Visualize the Model}
+\bigskip
+```{r, echo = FALSE}
+plot(x = x$Age, y = x$Expenditures,xlab = "Age", ylab = "Expenditures",
+     main = "Plot of Average Expenditure by Age", pch = 19)
+
+abline(a = first_model$coefficients[1], b = first_model$coefficients[2], col = "red", lwd = 3)
+```
+\bigskip
+
+\subsubsection{Comments on the scatterplot}
+\indent The scatterplot provides a graphical representation of the first model. There is a negative association between age and average expenditures. The value of the coefficient suggests that a marginal increase in age is accompanied by a reduction of U$0.33 in average expenditures. The coefficient is statistically significant, allowing us to reject the null hypothesis that there is no linear association between the two variables. However, the scatterplot also reveals two separate groups of observations and that the model is probably not capturing the true relationship between age and average expenditure.
+
+\subsection{Creating Separate Models}
+\subsubsection{Model A: Estimating OLS Coefficients, Age Standard Error and Age T-Value for Customers Under 40}
+
+```{r, echo = FALSE}
+under_40 <- subset(x, x$Age < 40)
+model_under40 <- lm(Expenditures ~ Age, data = under_40)
+
+##Printing OLS Coefficients for Customers Under 40
+print(paste("Estimate of the Intercept: ", as.character(round(coef(summary(model_under40))[,"Estimate"][1],2)), sep = ""))
+
+print(paste("Estimate of the Age Coefficient: ", as.character(round(coef(summary(model_under40))[,"Estimate"][2],2)), sep = ""))
+
+
+#Regression Standard Errors
+print(paste("Standard Error of Age Coefficient: ",as.character(round(summary(model_under40)[["coefficients"]][2,2],4)),
+sep = ""))
+
+print(paste("T Statistic of Age Coefficient: ",as.character(round(coef(summary(model_under40))[,"t value"][2],4)),
+sep = ""))
+
+print(paste("P-Value Associated with Age Coefficient: ",as.character(round(coef(summary(model_under40))[,"Pr(>|t|)"][2],4)),
+sep = ""))
+```
+\bigskip
+\subsubsection{Model B: Estimating OLS Coefficients, Age Standard Error and Age T-Value for Customers Over 40}
+```{r, echo = FALSE}
+over_40 <- subset(x, x$Age >= 40)
+model_over40 <- lm(Expenditures ~ Age, data = over_40)
+
+##Printing OLS Coefficients for Customers Under 40
+print(paste("Estimate of the Intercept: ", as.character(round(coef(summary(model_over40))[,"Estimate"][1],2)), sep = ""))
+
+print(paste("Estimate of the Age Coefficient: ", as.character(round(coef(summary(model_over40))[,"Estimate"][2],2)), sep = ""))
+
+
+#Regression Standard Errors
+print(paste("Standard Error of Age Coefficient: ",as.character(round(summary(model_over40)[["coefficients"]][2,2],4)),
+sep = ""))
+
+print(paste("T Statistic of Age Coefficient: ",as.character(round(coef(summary(model_over40))[,"t value"][2],4)),
+sep = ""))
+
+print(paste("P-Value Associated with Age Coefficient: ",as.character(round(coef(summary(model_over40))[,"Pr(>|t|)"][2],4)),
+sep = ""))
+```
+\bigskip
+\subsection{Comments on new results}
+There are a handful of differences that are worth exploring: 
+
+i) The coefficient for age, which was initially negative in the first model, became positive in the two most recent models. For customers under 40, a marginal increase in age is accompanied by an expected increase of U$0.2 in average daily expenditures. For customers over 40, a marginal increase in age is associated with an expected increase of U\$0.15 in average daily expenditures.
+ii) Whereas we are able to reject the null hypothesis in the first model and in the model for customers under 40, it is not possible to reject it for customers over 40, for the p-value associated with the coefficient b under the assumption that the null hypothesis is true is equal to 0.4736.

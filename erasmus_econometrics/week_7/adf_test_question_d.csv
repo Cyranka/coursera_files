@@ -1,0 +1,5 @@
+"","Estimate","Std. Error","t value","Pr(>|t|)"
+"(Intercept)",0.0901,0.0376,2.3999,0.0172
+"time(Date)",0.0001,0,2.4066,0.0169
+"previous_LOGGDP",-0.0193,0.0081,-2.3712,0.0185
+"lag1_LOGGDP_diff",0.6129,0.0501,12.2358,0

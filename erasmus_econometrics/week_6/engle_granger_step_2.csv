@@ -1,0 +1,6 @@
+"","Estimate","Std. Error","t value","Pr(>|t|)"
+"(Intercept)",24.992,847.826,0.029,0.977
+"previous_residual",-0.293,0.068,-4.306,0
+"lag1_diffres",-0.286,0.079,-3.64,0
+"lag2_diffres",-0.142,0.075,-1.879,0.061
+"lag3_diffres",-0.096,0.066,-1.461,0.145
