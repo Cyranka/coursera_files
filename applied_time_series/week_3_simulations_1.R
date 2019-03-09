@@ -11,6 +11,6 @@ plot( arima.sim(n=150, list(ma=c(0.33, 0.33, 0.33)      )  ) , main="MA3",ylab =
 plot( arima.sim(n=150, list(ma=c(0.2, 0.2, 0.2, 0.2, 0.2) )  ), main="MA5" ,ylab = "");
 
 ##
-par(mfrow = c(1,1)))
+par(mfrow = c(1,1))
 set.seed=1
 (acf(arima.sim(n=1000, model=list(ma=c(0.5,0.5)))))
