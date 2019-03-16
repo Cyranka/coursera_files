@@ -17,6 +17,7 @@ n <- 10000 ##Total data points
 
 
 # Simulate AR(2) process with model parameters ----------------------------
+# The sigma parameter refers to the sd of the residuals/white noise
 ar_2_process <- arima.sim(n = n,model = list(ar =phi), sd= sigma)
 
 
@@ -33,7 +34,7 @@ phi_hat <- solve(R) %*% r ##Estimate for phi vector
 # Estimation of the variance ----------------------------------------------
 c0 <- acf(ar_2_process, type='covariance', plot=F)$acf[1] ##Variance at lag 0
 var_hat <- c0*(1 - sum(phi_hat*r))
-var_hat ##Estimate of the variance of the AR(2) process
+var_hat ##Estimate of the variance of the white noise
 
 
 # Graphing the process ----------------------------------------------------
