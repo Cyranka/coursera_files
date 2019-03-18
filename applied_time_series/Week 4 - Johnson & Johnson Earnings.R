@@ -49,6 +49,7 @@ phi_0_hat
 
 
 # Predictions from the model ----------------------------------------------
+##predicting diff log
 par(mfrow = c(1,1))
 predictions <- vector(length = length(jj_log_return_mean_0), mode = "numeric")
 predictions <- vector(length = 83, mode = "numeric")
@@ -75,4 +76,29 @@ tibble(
     )  + 
     guides(color = guide_legend(title = "Series",title.position = "top",
                                 title.hjust = 0.5, label.position = "bottom")) + 
+    labs(x = "Time", y = "Log difference of earnings")
+
+
+# Back to original scale --------------------------------------------------
+same_scale <- vector(length = 83, mode = "numeric")
+for(i in 5:length(predictions)){
+    same_scale[i] <- exp(predictions[i]) + JohnsonJohnson[i-1]
+}
+
+tibble(
+    time = 1:83,
+    earnings = JohnsonJohnson[2:84],
+    predictions = same_scale[2:84]
+) %>%
+    gather(
+        measure, value, -time
+    ) %>%
+    ggplot(aes(x = time, y = value,
+               color = str_to_title(measure))) + 
+    geom_line() + 
+    hrbrthemes::theme_ipsum_rc() + 
+    theme(
+        legend.position = "bottom"
+    ) + guides(color = guide_legend(title = "Series",title.position = "top",
+                                  title.hjust = 0.5, label.position = "bottom")) + 
     labs(x = "Time", y = "Earnings")
