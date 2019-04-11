@@ -125,3 +125,23 @@ ggAcf(sunspotarea, lag.max = 40)
 autoplot(arrivals, facets = TRUE,colour = TRUE)
 
 ggseasonplot(arrivals[,"NZ"])
+
+# Question 9: Pigs dataset ------------------------------------------------
+my_pigs <- window(pigs, start = 1990) ##Window serves to cut time-series
+autoplot(my_pigs) + 
+    labs(title = "Monthly pigs slaughtered in Victoria, Australia",
+         y = "Total", x = "Date") +
+    scale_y_continuous(labels = scales::comma) ##Seems to be trending high
+ggAcf(my_pigs) + 
+    labs(title = "ACF for Pig data")
+
+# Question 10: 292 of consecutive trading ---------------------------------
+ddj <- diff(dj) ##First differencing of dow jones data
+
+autoplot(ddj) + 
+    labs(title = "First differencing of Dow Jones Index",
+         y = "", x = "Date")
+
+ggAcf(ddj) + 
+    labs(title = "First differences of Dow Jones Index")
+
