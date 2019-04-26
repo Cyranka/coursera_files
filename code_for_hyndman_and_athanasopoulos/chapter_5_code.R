@@ -139,3 +139,14 @@ autoplot(uschange[,"Consumption"]) +
     ylab("% change in US consumption") + 
     autolayer(fcast_ave, series = "Average increase", PI = TRUE) + 
     autolayer(fcast_up, series = "Extreme increase", PI = TRUE)
+
+# Non-linear forecasting: Boston marathon -------------------------------------------
+rm(list = ls())
+
+marathon %>%
+    splinef(lambda = 0) %>%
+    autoplot() ##fit natural splines o the data
+
+marathon %>%
+    splinef(lambda = 0) %>%
+    checkresiduals() ##Check residuals
