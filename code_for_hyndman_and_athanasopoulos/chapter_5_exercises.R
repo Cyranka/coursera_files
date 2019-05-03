@@ -214,4 +214,47 @@ autoplot(fc_2005) +
     autolayer(window(gasoline, start = c(2005,0),end = c(2005,53))) + 
     guides(level = FALSE)
 
+# Question 7 --------------------------------------------------------------
+rm(list = ls())
 
+##Lake huron dataset
+autoplot(LakeHuron)
+
+##b) Fit a linear regression
+fit_model <- tslm(LakeHuron ~ trend)
+
+autoplot(cbind(LakeHuron, fitted.values(fit_model)))
+CV(tslm(LakeHuron ~ trend))
+
+##b) Fit a piecwise trend model
+t <- time(LakeHuron) ##This function creates the vector of times
+t_break <- 1915
+
+tb_1 <- ts(pmax(0,t - t_break), start = 1875)
+fit_pw <- tslm(LakeHuron ~ t + tb_1)
+
+autoplot(cbind(LakeHuron, fitted.values(fit_pw)))
+CV(tslm(LakeHuron ~ trend))
+CV(fit_pw)
+
+##Provide linear forecast
+forecasts_linear <- forecast(fit_model,h = 8)
+
+##Provide piecewise forecast
+t <- time(LakeHuron)
+t_new <- t[length(t)] + seq(8)
+t_breaknew <- tb_1[length(tb_1)] + seq(8)
+
+piecewise_df <- cbind(
+    t = t_new,
+    tb_1 = t_breaknew
+) %>% as.data.frame()
+
+fcasts_pw <- forecast(fit_pw, piecewise_df)
+
+##Plot forecasts
+autoplot(LakeHuron) + 
+    autolayer(forecasts_linear)##Fit linear model
+    
+autoplot(LakeHuron) + 
+    autolayer(fcasts_pw)##Fit piecewise model
