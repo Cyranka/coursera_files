@@ -109,3 +109,67 @@ seasonal(fit_x11) %>% as_tibble() %>%
     group_by(month) %>%
     summarise(sd = sd(retail)) %>%
     arrange(desc(sd)) ##Obtain standard deviation of seasonal component
+
+# Question 4: notebook --------------------------------------------------------------
+
+# Question 5: cangas dataset ----------------------------------------------
+rm(list = ls())
+
+#a) Plot the data
+autoplot(cangas, series = "Monthly Canadian gas production",
+         ylab = "Billions of cubic metres",
+         x = "Month") + 
+    scale_color_manual(values = "steelblue") 
+
+ggsubseriesplot(cangas)
+ggseasonplot(cangas)
+
+#b) Perform stl decomposition
+stl_1 <- cangas %>%
+    stl(t.window = 13, s.window = 7, robust = TRUE) ##Seven year window
+
+autoplot(stl_1)
+
+#c) Perform seats
+cangas %>% seas() %>%
+    autoplot() + 
+    ggtitle("SEATS decomposition of cangas dataset")
+
+#c) Perform x11
+cangas %>% seas(x11 = "") %>%
+    autoplot() + 
+    ggtitle("X11 decomposition of cangas dataset")
+
+seasonal(stl_1)
+
+
+# Question 6 --------------------------------------------------------------
+rm(list = ls())
+dev.off()
+
+#a) Perform stl decomposition
+stl_bricksq <- bricksq %>% stl(t.window = 5, s.window = 7)
+
+#b)Plot seasonally adjusted data
+autoplot(bricksq, series = "Data") + 
+    autolayer(seasadj(stl_bricksq), series = "Seasonally adjusted") + 
+    scale_color_manual(
+        values = c("gray","blue"),
+        breaks = c("Data", "Seasonally adjusted")
+    ) + 
+    theme_minimal() + 
+    theme(
+        legend.position = "bottom"
+    )
+
+
+#c) Producing naive forecasts of seasonally adjusted data
+naive_forecasts <- seasadj(stl_bricksq) %>% naive(h = 9) ##until Q4 1996
+snaive_forecasts <- seasadj(stl_bricksq) %>% snaive(h = 9)##until Q4 1996
+
+#d) Reseasonalize the forecasts
+brick_forecast <- stlf(bricksq, h = 9)
+
+#
+checkresiduals(brick_forecast)
+checkresiduals(naive_forecasts)
