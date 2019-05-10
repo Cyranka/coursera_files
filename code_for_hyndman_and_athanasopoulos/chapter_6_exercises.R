@@ -165,11 +165,115 @@ autoplot(bricksq, series = "Data") +
 
 #c) Producing naive forecasts of seasonally adjusted data
 naive_forecasts <- seasadj(stl_bricksq) %>% naive(h = 9) ##until Q4 1996
+autoplot(naive_forecasts)
 snaive_forecasts <- seasadj(stl_bricksq) %>% snaive(h = 9)##until Q4 1996
+autoplot(snaive_forecasts)
 
 #d) Reseasonalize the forecasts
-brick_forecast <- stlf(bricksq, h = 9)
+brick_forecast <- stlf(seasadj(stl_bricksq), h = 9) ##obtain seasonally adjusted data and make forecasts
+autoplot(brick_forecast) ##
 
-#
+#e) Check residuals
 checkresiduals(brick_forecast)
 checkresiduals(naive_forecasts)
+
+#f) roboust stl decomposition
+stl_bricksq_robust <- bricksq %>% stl(t.window = 5, s.window = 7,robust = TRUE)
+stlf_robust_seasonal <- seasadj(stl_bricksq_robust)
+
+robust_predictions <- stlf(stlf_robust_seasonal)
+autoplot(robust_predictions)
+
+#g) Compare forecasts using last two years of data
+rm(list = ls())
+brick_train <- window(bricksq, end = c(1991,4))
+brick_test <- window(bricksq, start = c(1992,1))
+
+#Start with robust decomposition
+stl_bricksq_robust <- brick_train %>% stl(t.window = 5, s.window = 7,robust = TRUE)
+
+#Get seasonally adjusted data
+seasonally_adjusted_data <- seasadj(stl_bricksq_robust)
+
+#Get forecasts
+forecasts_stlf <- stlf(seasonally_adjusted_data, h = 11)
+forecasts_snaive <- snaive(seasonally_adjusted_data, h = 11)
+
+accuracy(forecasts_stlf, brick_test) ##Forecast metrics for STLF
+accuracy(forecasts_snaive, brick_test) ##Forecast metrics for naive
+
+cowplot::plot_grid(autoplot(forecasts_stlf),
+                   autoplot(forecasts_snaive),nrow = 2)
+
+##Plot forecasts with actual data
+autoplot(bricksq, alpha =0.5) + 
+    autolayer(forecasts_stlf, series = "STLF", PI = FALSE) + 
+    autolayer(forecasts_snaive, series = "Snaive", PI = FALSE) 
+    
+
+# Question 7 --------------------------------------------------------------
+rm(list = ls())
+
+#Plot the writing series
+autoplot(writing) + 
+    labs(x = "Year", y = "Sales", 
+         title = "Industry sales for printing and writing paper") + 
+    theme_minimal()
+
+writing_train <- window(writing, end = c(1975,12))
+writing_test <- window(writing, start = c(1976,1))
+
+#STFL decomposition for non-transformed series
+stl_writing <- stl(writing_train,t.window = 13, s.window = 7,robust = TRUE)
+autoplot(stl_writing) ##Check the decomposition
+
+#Obtain seasonally adjusted data of series
+writing_stl_seasadj <- seasadj(stl_writing)
+autoplot(writing_train, series = "Data") + 
+    autolayer(writing_stl_seasadj, series = "Seasonally adjusted") + 
+    scale_color_manual(
+        values = c("gray","blue"),
+        breaks = c("Data", "Seasonally adjusted")
+    )
+
+#Produce forecasts
+naive_forecasts <- stlf(writing_stl_seasadj,h = 24, method = "naive") #naive method
+rwdrift_forecasts <- stlf(writing_stl_seasadj,h = 24, method = "rwdrift") ##Random-walk with drift
+
+accuracy(naive_forecasts, writing_test)
+accuracy(rwdrift_forecasts, writing_test)
+
+autoplot(writing) + 
+    autolayer(naive_forecasts, PI = FALSE, series = "Naive forecasts") + 
+    autolayer(rwdrift_forecasts, PI = FALSE, series = "RWdrift forecasts")
+
+
+# Question 8 --------------------------------------------------------------
+rm(list = ls())
+
+#Plot the fancy series
+autoplot(fancy) + 
+    labs(x = "Year", y = "Sales", 
+         title = "Sales for a souvenir shop") + 
+    theme_minimal()
+
+#Obtain box-cox transform
+bc_lambda <- BoxCox.lambda(fancy)
+bc_fancy <- BoxCox(fancy, bc_lambda)
+
+autoplot(stl(bc_fancy, t.window = 13, s.window = 7,robust = TRUE))
+
+#
+bc_fancy_stl_seasadj <- seasadj(stl(bc_fancy, t.window = 13, s.window = 7,robust = TRUE))
+autoplot(BoxCox(fancy, bc_lambda), series = "Data (Box-Cox transfored)") + 
+    autolayer(bc_fancy_stl_seasadj, series = "Seasonally adjusted") + 
+    scale_color_manual(
+        values = c("gray","blue"),
+        breaks = c("Data", "Seasonally adjusted")
+    )
+
+naive_forecasts <- stlf(bc_fancy_stl_seasadj,h = 12, method = "naive") #naive method
+rwdrift_forecasts <- stlf(bc_fancy_stl_seasadj,h = 12, method = "rwdrift") ##Random-walk with drift
+
+naive_forecasts
+rwdrift_forecasts
