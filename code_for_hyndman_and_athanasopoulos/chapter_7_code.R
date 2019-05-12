@@ -125,3 +125,12 @@ fit <- ets(aust) ##Automatically fit ETS models
 summary(fit) ##Summary of the model
 
 #obtain one step training errors and model multiplicative errors.
+cbind("Residuals" = residuals(fit),
+      "Forecast errors" = residuals(fit, type = "response")) %>%
+    autoplot(facet = TRUE) + 
+    xlab("Year") + ylab("")
+
+#obtain forecasts from an ETS model
+fit %>% forecast(h = 8) %>%
+    autoplot() + 
+    ylab("International visitor night in Australia (millions)")
