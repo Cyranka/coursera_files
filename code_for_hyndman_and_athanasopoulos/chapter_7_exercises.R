@@ -180,3 +180,69 @@ autoplot(my_retail_series) +
 
 autoplot(my_retail_series) + 
     autolayer(train_holt_damped, PI = FALSE)
+
+# Question 9 -------------------------------------------------------------
+#Find lambda
+box_cox_lambda <- BoxCox.lambda(my_retail_series)
+bc_retail_train <- BoxCox(my_retail_series, box_cox_lambda) %>% window(end = c(2010,12))
+bc_retail_test <- BoxCox(my_retail_series, box_cox_lambda) 
+bc_retail_test <- bc_retail_test[346:381] %>%
+    ts(frequency = 12, start = c(2011,1))
+
+stl_transformed <- bc_retail_train %>%
+    stl(t.window = 13, s.window = "periodic", robust = TRUE) ##This can be periodic, because of the transformation
+
+autoplot(stl_transformed) ##Notice how it stabliized seasonal variation
+
+##Extract seasonally adjusted data
+season_adjusted <- seasadj(stl_transformed)
+
+##Forecast next two years using damped method
+##AAN means additive errors, additive trend, no seasonality
+forecasts_damped <- stlf(season_adjusted, etsmodel = "AAN", damped = TRUE,h = 24)
+forecasts_regular <- stlf(season_adjusted, etsmodel = "AAN", damped = FALSE,h = 24)
+
+##Use ETS to find better model automatically
+ets_auto_model <- ets(bc_retail_train)
+ets_forecast <- ets_auto_model %>% forecast(h = 24)
+
+##Compare fists
+accuracy(forecasts_damped,bc_retail_test)[2,2] ##RMSE
+autoplot(forecasts_damped, PI = FALSE)
+accuracy(forecasts_regular,bc_retail_test)[2,2] ##RMSE
+autoplot(forecasts_regular, PI = FALSE)
+accuracy(ets_forecast,bc_retail_test)[2,2] ##RMSE
+autoplot(ets_forecast, PI = FALSE)
+
+# Question 10 -------------------------------------------------------------
+remove(list = ls())
+
+#Plot the data
+autoplot(ukcars);frequency(ukcars)
+
+#use stl to decompose the data: I will assume that the seasonality is additive
+stl_decomposition <- ukcars %>%
+    stl(t.window = 5, s.window = "periodic", robust = TRUE) 
+autoplot(stl_decomposition)
+
+ukcars_seasadj <- seasadj(stl_decomposition)
+autoplot(ukcars, series = "Data", alpha = 0.5) + 
+    autolayer(ukcars_seasadj, series = "Seasonally adjusted")    
+
+#Forecast the next two years of data
+forecast_stl <- stlf(ukcars,h = 8,etsmodel = "AAN",damped = TRUE) ##You can pass the series directly
+autoplot(forecast_stl, PI = FALSE)
+forecast_holt <- stlf(ukcars,h = 8,etsmodel = "AAN",damped = FALSE)
+autoplot(forecast_holt, PI = FALSE)
+
+#ETS model
+ets_fit <- ets(ukcars)
+ets_f <- ets_fit %>% forecast(h = 8)
+autoplot(ets_f)
+##
+accuracy(forecast_stl)
+accuracy(forecast_holt)
+accuracy(ets_f)
+
+#Check residuals of better in-sample model
+checkresiduals(forecast_holt)
