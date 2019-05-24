@@ -169,3 +169,47 @@ arima_forecasts <- forecast(auto_arima_gdp, h = 12)
 #Fit an ETS
 ets_forecasts <- forecast(ets(usgdp), h = 12)
 autoplot(ets_forecasts)
+
+# Question 10: austourists ------------------------------------------------
+rm(list = ls());dev.off()
+
+#a) Plot the data
+autoplot(austourists)
+austourists %>% stl(s.window = "periodic") %>%
+    autoplot()
+
+#b) Describe the ACF
+ggtsdisplay(austourists)
+
+#c) Describe the PACF
+ggtsdisplay(austourists)
+
+#d) Produce seasonal differenced data, but first transform the data
+obtain_lambda <- BoxCox.lambda(austourists)
+transformed_data <- BoxCox(austourists, lambda = obtain_lambda)
+season_diff <- diff(transformed_data, lag = 4)
+ggtsdisplay(season_diff)
+season_diff %>% urca::ur.kpss()
+
+#e) Use auto.arima
+fit_auto <- auto.arima(austourists, lambda = obtain_lambda)
+summary(fit_auto)
+
+#e.1) Use TSCV to fit the model
+my_model <- function(x, h){forecast(Arima(x,lambda = obtain_lambda,order = c(1,0,1),
+                                 seasonal = c(1,1,1)),h =h)}
+
+auto_model <- function(x, h){forecast(Arima(x,lambda = obtain_lambda,order = c(1,0,0),
+                                   seasonal = c(0,1,1), include.drift = TRUE), h=h)}
+
+
+e_1 <- tsCV(austourists, my_model, 1)
+e_2 <- tsCV(austourists, auto_model, 1)
+
+mean(e_1**2, na.rm = TRUE)
+mean(e_2**2, na.rm = TRUE)
+
+autoplot(austourists, alpha =0.5) + 
+    autolayer(fitted(fit_auto))
+
+autoplot(forecast(fit_auto, h = 8))
