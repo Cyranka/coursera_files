@@ -111,3 +111,62 @@ lh02 %>% diff(lag = 12) %>%
 fit <- Arima(h02, order = c(3,0,1),seasonal = c(0,1,2),lambda = 0) ##Log transform with lambda = 0
 summary(fit)
 checkresiduals(fit, lag = 36)
+
+h02 %>%
+    Arima(order = c(3,0,1), seasonal = c(0,1,2),lambda = 0) %>%
+    forecast() %>%
+    autoplot() + 
+    ylab("H02 sales (million scripts)") + 
+    xlab("Year")
+
+# Section 8.10: ETS vs ARIMA ----------------------------------------------
+remove(list = ls())
+fets <- function(x, h){
+    ##Generate ETS forecasts of horizon h
+    forecast(ets(x), h = h)
+}
+
+farima <- function(x, h){
+    ##Generate arima forecasts of horizon h
+    forecast(auto.arima(x), h = h)
+}
+
+air <- window(ausair, start = 1990)
+autoplot(air) ##It has a trend, but it is hard to determine seasonality since f = 1
+
+e1 <- tsCV(air, fets, h = 1) ##CV errors for ETS
+e2 <- tsCV(air, farima, h = 1) ##CV errors for ARIMA
+
+mean(e1**2, na.rm = TRUE) ##MSE for ETS
+mean(e2**2, na.rm = TRUE) ##MSE for ARIMA
+
+air %>%
+    ets() %>% ##Model has multiplicative error (M); Additive trend (A); No season (N)
+    forecast() %>%
+    autoplot() ##Generate forecasts
+
+# Section 8.10: ARIMA vs ETS on seasonal data -----------------------------
+rm(list = ls())
+cement <- window(qcement, start = 1988)
+train <- window(cement, end = c(2007,4))
+
+(fit_arima <- auto.arima(train,stepwise = FALSE,approximation = FALSE))
+summary(fit_arima)
+checkresiduals(fit_arima)
+
+
+(fit.ets <- ets(train)) ##Trend changes little, and heavy weight on nearby points
+checkresiduals(fit.ets)
+
+a1 <- fit_arima %>% forecast(h = 4*(2013-2007)+1) %>%
+    accuracy(qcement)
+
+a1[,c("RMSE","MAE", "MAPE", "MASE")]
+
+a2 <- fit.ets %>% forecast(h = 25) %>%
+    accuracy(qcement)
+a2[,c("RMSE","MAE", "MAPE", "MASE")]
+
+#Generate forecasts from an ETS model
+cement %>% ets() %>% forecast(h = 12) %>%
+    autoplot()
