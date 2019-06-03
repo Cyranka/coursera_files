@@ -1,0 +1,406 @@
+##Shiny notes
+
+
+Module 1 - Lecture 1 
+
+Template
+
+library(shiny) ##Loads the shiny package
+
+ui <- fluidPage() ##Creates the webpage. Defines the appearance
+
+server <- function(input, output){} ##Creates the server portion, where the logic is implemented
+
+shinyApp(ui = ui, server = server) #Combine UI + server into a shinyapp and runs it
+
+##Adding text
+Formatted text
+
+h1() Primary header
+
+h2() Secondary header
+
+strong() bold
+
+em () italicized text
+
+Wrap one of these primay functions around the text
+
+##Layouts
+Sidebar layout: two column structure with a smaller sidebar on the left
+				and a larger main panel on the right
+
+
+ui <- fluidPage(
+	sidebarLayout(
+		sidebarPanel(
+			"This is the sidebar"
+		),
+		mainPanel(
+			"Main panel functions go here"
+		)
+	)
+)
+
+______________________________________________________
+
+Module 1 - Lecture 2
+
+To be useful shiny apps need input and output
+
+An input is eerything an user can interact with, using the mouse or keyboard to modify its value
+
+Inputs are created by calling an input function inside the UI
+
+Most input functions have the same two first arguments:
+	1. inputID => has to be unique so you can retrieve it
+	2. label => Descriptive text that appears above
+
+Outputs are any objects that R creates and that we want to show in our shiny app (plots, tables, text, etc.)
+
+Creating an output is a two step process:
+	1. Create placeholder for output (in UI) (usually main panel)
+	2. Write R code to generate output (in server)
+
+3 rules to build output object:
+	1. The code for the output object must be inside a render function (renderPlot(), renderText(), etc.)
+	2. The result of the render function must be saved to the output list using output$<outputId>
+	3. Use input$<inputId> to access any of the input values chosen by the user.
+
+
+______________________________________________________
+
+Module 1 - Lecture 3 (Reactivity)
+
+Reactivity programming:
+- Enables outputs to automatically react to changes in input
+- When value of variable x changes, anything that relies on x is re-evaluated
+- All inputs are automatically reactive
+- Reactive values can only be used inside reactive contexts
+- Any render*() function is a reactive context
+
+Observe a reactive value
+observe({...}) to access reactive variable
+
+server <- function(input, output){
+	observe({
+		print(input$num) ##This will now run
+	})
+
+##Useful for debugging, track reactive variable
+
+Create a reactive variable
+reactive({...})	 to create reactive variable
+
+server <- function(input, output){
+	x <- reactive({
+		input$num + 1
+	})
+}
+
+Access custom reactive variable like a function: add parentheses
+
+Any variable that depends on a reactive value must be created using reactive()
+
+
+______________________________________________________
+
+Module 2 - Lecture 2 (Make the perfect plot)
+
+Text inputs are useuful to retrieve text from the user
+
+ui <- fluidPage(
+	textInput(
+		inputId = "package",
+		label = "What is your favorite R package?".
+		value = "shiny" ##This is a placeholder for the moment the app initializes
+	)
+)
+
+server <- function(input,output){}
+shinyApp(ui, server)
+
+Numeric inputs - used to retrieve a number
+
+numericInput(
+	"years", #InputId
+	"How many years have you been using R", #Label
+	value = 4, #Placeholder
+	min = 0, #Minimum possible number
+	max = 25, #Maximum possible number
+)
+
+The return value is an integer or numeric
+
+Checkbox input - Presents the user with a box that they can check or uncheck
+checkboxInput(
+	"agree", #Inputid
+	"I agree to the terms and conditions", #Label
+	value = TRUE, ##Check or not the box
+)
+
+The return value is a boolean (TRUE/FALSE)
+
+
+______________________________________________________
+
+Module 2 - Lecture 3 (More input types)
+
+sliderInput() #Another way for the user to select a number
+				#Min and max are required
+				#Can also be used to select two numbers at once (value has to be a vector of two numbers)
+
+
+##Definition
+Slider inputs can be used for similar purposes to numeric inputs, as they both provide the user with a way to select a number.
+
+If the initial provided value (the value argument) of the slider is a single number, then the slider will be used to select single numbers. However, if the initial value is a vector of two numbers, then the slider will be used to select two numbers instead of just a single value.
+
+
+
+radioButtons() #Allow developers to show the user different options and let them pick one
+				#They have a selected argument to establish a default value. If no 
+				select argument is defined, it picks the first in the choice vector
+
+
+##Definition
+Radio buttons are used when you want to present the user with several options and ask them to choose one. They have a choices parameter that defines the different options the user can choose from, and a selected argument that defines which choice is selected initially. Note that there is no value parameter, though you can think of selected as having a similar role.				
+
+selectInput() #Also known as drop-down lists
+
+##Definition
+When there are many options to let the user choose from, radio buttons can take up a lot of space and may not be ideal. Select inputs—also called 'dropdown lists'—can also be used to ask the user to choose an option from a list of choices, but in a more compact way. With a select input, all the options appear in a scrollable list, so it can be used even if you have many choices.
+
+Similar to radio buttons, select inputs also have choices and selected parameters. Additionally, select inputs have a multiple argument, which, when set to TRUE, allows the user to select more than one value.
+
+______________________________________________________
+
+Module 2 - Lecture 4 (Advanced features to improve your plot)
+
+library(colourpicker) ##Package that contains a function to create a color input
+
+The colourpicker package provides a colour input, available through the colourInput() function. Even though colour inputs are not part of the shiny package, they behave in the same way as any other input.
+
+A colour input can have many different arguments you can explore, but we will only use the basic arguments: inputId, label, and value. The value argument accepts a colour to use as the initial value. Colours can be specified in several different formats, but the easiest one is to simply use English colour names such as "red" or "yellow".
+
+
+Outputs can have arguments, like plotOutput(outputId, width, height,
+											click, dblclick, ...)
+
+
+Interactive plots with plotly
+
+______________________________________________________
+
+Module 3 - Lecture 1 (Explore dataset with Shiny)
+
+Visualize data as a table: in shiny tables are outputs:
+							1st - tableOutput in the UI
+							2nd - renderTable in the server
+
+
+choices argument of selectInput() can be any list of strings
+including adding values to the list
+
+
+______________________________________________________
+
+Module 3 - Lecture 4 (Plot and download)
+
+Plots are outputs:
+	1. Plot output placeholder function in UI
+	2. Plot render function in the server
+
+Recall that plots are output objects, and as such they are added to a Shiny app using the plotOutput() + renderPlot() functions. The output function is added to the UI to determine where to place the plot, and the render function in the server code is responsible for generating the plot.
+
+
+
+Download the data:
+	1. Downloading is supported using download button
+	2. Can create any type of file
+	3. Download button is treated as output:
+		1. Add download button to UI (similar to output functions)	
+		2. Add download handler in server: similar to render functions
+			a) first argument is filename
+			b) content is a function with 1 argument: create the file to download
+
+Downloading files is achieved using the pair of functions downloadButton() and downloadHandler(). These two functions pair together similarly to how output and render functions are paired: downloadButton() determines where in the UI it will show up, while downloadHandler() needs to be saved into the output list and has the actual R code to create the downloaded file.
+
+______________________________________________________
+
+Module 3 - Lecture 5 (Reactive variables)
+
+ - Interesting to remove code duplication. Duplication requires more maintenance and code needs constant updating.
+ - Use reactive() variables instead of code duplication
+ - To call reactive variables, it is necessary to put parentheses in the end, like my_variable()
+ - Reactive variables caching: store their values after running for the first time. They remember their own value.
+ - Reactive variables are lazy. Not calculated until value is needed
+
+
+Reactive variables can be used to reduce code duplication, which is generally a good idea because it makes maintenance easier.
+
+______________________________________________________
+
+Module 3 - Lecture 6 (Visual enhancements)
+
+Split the UI into tabs
+
+tabPanel(title = "tab title", "content goes here separated by commas")
+tabPanel(title = "tab 2", "second tab", plotOutput("plot"))
+
+All tabs need to be wrapped up inside a special container known as the tabset.
+fluidPage(
+	tabsetPanel(
+		tabPanel(title = "tab 1","content goes here"),
+		tabPanel(title = "tab 2", "second tab", plotOutput("plot")),
+		tabPanel(title = "tab 3", textInput("text", "Name", ""))
+
+
+	)
+)
+
+Using CSS (Cascading style sheets)
+Markup language to customize the look of any element in a webpage
+
+CSS rules syntax
+
+#ID {
+	property: value;
+	property: value;
+
+}
+
+ - each property value pair defines a single style rule for the element that has a given ID
+ - To add CSS to shiny, use tags$style
+ 	tags$style("
+ 		#ID {
+ 			property: value;
+ 		}
+
+ 	")
+
+ anywhere inside the UI
+
+
+CSS is an extremely popular markup language that is used to tell the browser how to display elements on a page. You need to use CSS if you want to deviate from the default look-and-feel of Shiny and want to customize the appearance of different items in your app.
+
+Recall that CSS is comprised of a set of rules, where each rule is a property: value pair associated with an element on the page. It's possible to include CSS in your app by writing it in a separate file and importing it with includeCSS(), but in this course we will use the simpler approach of placing the CSS code inside tags$style() in the UI.
+
+CSS example
+my_css <- "
+#download_data {
+  /* Change the background colour of the download button
+     to orange. */
+  background: orange;
+
+  /* Change the text size to 20 pixels. */
+  font-size: 20px;
+}
+
+#table {
+  /* Change the text colour of the table to red. */
+  color: red;
+}
+"
+
+______________________________________________________
+
+Module 4 - Lecture 1 (Word cloud)
+
+wordcloud2Output() + renderWordcloud2()
+
+______________________________________________________
+
+Module 4 - Lecture 2 (Adding word sources)
+
+textAreaInputs() is similar to textInput, but provides for multiple rows of text
+
+textAreaInput(inputId, label,value, rows,...)
+
+file inputs - UI
+
+fileInput(inputId, label, ...)
+
+File inputs: input$<inputId> is dataframe with 1 row per file.
+	Variables for this data frame are: name, size, type, datapath
+
+datapath has the location of the most important file.
+
+to read the selected file: input$<inputId>$datapath
+
+
+______________________________________________________
+
+Module 4 - Lecture 3 (Combining word sources)
+
+Conditional panels:
+
+• Show/hide UI elements based on input value
+conditionalPanel(condition, ...)
+
+condition argument replaces input$<id> is replaced by input.<id>
+
+The rest of the arguments are UI elements that will be shown when the condition is met
+
+ui <- fluidPage(
+	radioButtons("time_of_day",
+				"Choose your favorite time of day",
+				)
+	plotOutput("morning_only_plot")	
+)
+
+ui <- fluidPage(
+	radioButtons("time_of_day",
+				"Choose your favorite time of day"
+				),
+	conditionalPanel(
+	condition = "input.time_of_day" == "Morning",
+	plotOutput("morning_only_plot")
+	)
+)
+
+______________________________________________________
+
+Module 4 - Lecture 4 (Reactivity)
+
+• reactive() and input$ are reactive
+• Code depending on reactive variables re-runs when dependencies update
+• Acessing reactive value makes it dependency
+
+x <- reactive({
+	y() * input$num1*input$num2
+})
+
+Isolate
+
+• Use isolate() to not create reactive dependency
+• If reactive value inside isolate() is modified, nothing happens
+
+Action buttons
+actionButton(inputId, label, ...)
+
+• Only one simple interaction: click
+• Value of button is number of times it was clicked
+
+Action buttons as reactivity triggers
+• Acessing button input value in server triggers reactivity
+
+Add button to UI
+
+Access button to make it dependency.
+x <- reactive({
+	input$calculate_x
+
+	isolate({
+		y() * input$num1*input$num2
+	})
+})
+
+If there is a reactive variable that appears multiple times in your code, and you want to ensure that its modification does not trigger a re-evaluation of the code, you need to isolate all the instances of that variable. That means that if a variable x is inside an isolate() but also appears outside of it, then it will trigger reactivity.
+
+The following code defines a reactive variable result and calculates it using three input values:
+
+
+After isolating the word cloud render code so that it wouldn't update too often, the last step is to provide a way to render the word cloud only when the user chooses to. This can be achieved with the help of an actionButton().
+
+Isolate should be used with action buttons
