@@ -1,0 +1,251 @@
+Shiny dashboard class 1
+
+______________________________________________________
+
+Module 1 - Lecture 1
+
+Dashboard structure:
+
+1 ) Header: dashboardHeader()
+
+2 ) Sidebar: dashboardSidebar()
+3 ) Body: dashboardBody()
+
+Combine these three elements to create the ui
+
+ui <- dashboardPage(header, sidebar,body)
+server <- function(input,output){}
+
+______________________________________________________
+
+Module 1 - Lecture 2
+
+Updating the header
+
+Three type of dropdown menus:
+1) Messages 
+2) Notifications
+3) Tasks
+
+header <- dashboardHeader(
+	dropdownMenu(
+		type = "messages",
+		messageItem(
+			from = "Lucy",
+			message = "Some message!",
+			href = "http://www.datacamp.com"
+		),
+		messageItem(
+			...
+		)
+	)
+)
+
+header <- dashboardHeader(
+	dropdownMenu(
+		type = "notifications",
+		notificationItem(
+			text = "Some message",
+			href = "http://www.web.com"
+		)
+	)
+)
+
+header <- dashboardHeader(
+	dropdownMenu(
+	type = "tasks",
+	taskItem(
+		text = "Some text",
+		value = 15
+		)
+	)
+)
+
+You can add menus to your header using the dropdownMenu() function.
+
+You can also create a notification drop down menu on your header. This allows you to notify your user of something. Add a notification that the International Space Station is overhead.
+
+
+______________________________________________________
+
+Module 1 - Lecture 3
+
+Dashboard sidebard and body overview
+
+sidebar <- dashboardSidebar(
+	sidebarMenu(
+		menuItem(
+			"Data",
+			tabName = "data" ##Give names to link to tabs in the body
+		),
+		menuItem(
+			"Dashboard",
+			tabName = "dashboard"
+		)	
+	)
+)
+
+
+body <- dashboardBody(
+	tabItems(
+		tabItem(tabName = "data",
+				"Input data here"), ##These names must match the names on the sidebar
+		tabItem(tabName = "dashboard",
+				"Look at my cool dashboard")
+	)
+)
+
+##Adding tab boxes
+
+Now that you have created tabs on the sidebar, and tabs in the body, we can add boxes within each of the body's tabs (and there can be tabs within the boxes!) You can add a tabBox() directly to the dashboardBody() or place it within a tabItem()
+
+
+body <- dashboardBody(
+		tabBox(
+			title = "My first box",
+			tabPanel("Tab1", "Content for the first tab"),
+			tabPanel("Tab2", "Content for the second tab")
+
+		)
+)
+
+______________________________________________________
+
+Module 2 - Lecture 1
+
+Inputs
+
+Render functions
+
+______________________________________________________
+
+Module 2 - Lecture 2: Server-side dynamic how-to
+
+• Streaming aspect of data output -> Ability to read real-time data
+• Two functions: reactiveFileReader(), reactivePoll()
+
+reactiveFileReader() ##Checks if a file was changed, if yes, re-reads the file.
+
+server <- function(input, output, session){
+	reactive_data <- reactiveFileReader(
+		intervalMillis = 1000,
+		session = session,
+		filePath = "file.csv",
+		readFunc = read.csv
+	)
+}
+
+#To call the data treat reactiveFileReader as an output variable
+
+One benefit of a dashboard is the ability to examine real-time data. In shiny, this can be done using the reactiveFileReader() or reactivePoll() functions from the shiny package. For example, if we had our data saved as a .csv, we could read it in using reactiveFileReader() along with the readFunc set to read.csv.
+
+• The server continues to work in the same way, what changes is the placement. Think of sidebar as sidebarPanel() and the body as mainPanel()
+
+______________________________________________________
+
+Module 2 - Lecture 3: Optimizing performance
+
+If a dataset has only to be loaded once, it is more efficient to load it at the beginning of the session
+
+______________________________________________________
+
+Module 2 - Lecture 4: UI dynamic how-to
+
+Dynamic dropdown menu
+
+Dynamic boxes
+
+renderInfoBox() - infoBoxOutput()
+renderValueBox  - valueBoxOutput()
+
+______________________________________________________
+
+Module 3 - Lecture 1: Bootstrap explanation
+
+Bootstrap grid
+
+Bootstrap consists of 12 columns of equal width and infinite number of rows
+
+box(
+	width = 12,
+	title = "This box takes up the whole row!",
+	"A 12 column box."
+) ##Notice the width parameter
+
+Layout types
+___________________
+
+row-based layout
+- wrap boxes in a fluidRow function to form each row
+- Change height so they are all the same
+
+Recall that you can create a dashboard with row-based layout using the fluidRow() function from shiny within the dashboardBody()
+
+
+column-based layout
+- set the column function within a fluid row function
+
+Recall that you can create your contents in columns using a combination of the fluidRow() and column() functions from the shiny package. For example, for two columns of content in the body, you can do the following:
+
+mix-based layout
+
+______________________________________________________
+
+Module 3 - Lecture 2: Customizing the layout
+
+Dashboard skins
+• blue
+• black
+• purple
+• green
+• red
+• yellow
+
+add a skin to dashboardPage()
+
+dashboardPage(
+	skin = "green",
+	header = header,
+	sidebar = sidebar,
+	body = body
+)
+
+CSS
+
+1)Create a file and call it from the application
+
+dashboardBody( ##Notice that I am updating the dashboardBody
+	tags$head(
+		tags$link(
+			rel = "stylesheet",
+			type = "text/css",
+			href = "my_style.css"
+		)
+	)
+)
+
+2) In-line HTML customization
+dashboardBody(
+	tags$head(
+		tags$style(
+			HTML('
+				\\CSS here
+			')
+		)
+	)
+)
+
+______________________________________________________
+
+Module 3 - Lecture 3: Icons, statuses, colors
+
+
+Icons are a great way to make your dashboard look more polished! Remember the notification menu we created in Chapter 1? Spruce it up with a rocket icon! You can find other possible icons on the Font Awesome website. Recall that icons can be rendered using the icon() function in shiny
+
+icon(
+	name = "bicycle",
+	lib = "font-awesome"
+) ##Font-awesome is a package that contains a set of icons
+ 
+
+Statuses
