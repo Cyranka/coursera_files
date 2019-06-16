@@ -249,3 +249,45 @@ icon(
  
 
 Statuses
+
+______________________________________________________
+
+Module 4 - Lecture 1: Introduction to the NASA fireball data set
+
+Variables
+
+• date <date>
+• energy <numeric>
+• impact_e <numeric>
+• lat <numeric>
+• lat_dir <character>
+• lon <numeric>
+• alt <numeric>
+• vel <numeric>
+
+
+______________________________________________________
+
+Module 4 - Lecture 2: Dynamic refresher
+
+Dynamic refresher
+
+• render*()
+• *Output()
+
+HTML Widgets
+
+- Leaflet
+
+• renderLeaflet()
+• leafletOutput()
+
+library("leaflet")
+leaflet() %>%
+	addTiles() %>%
+	addMarkers(
+		lng = nasa_fireball$lon,
+		lat = nasa_fireball$lat,
+	)
+
+
